@@ -4,28 +4,63 @@ price (precio)
 thumbnail (ruta de imagen)
 id (código identificador)
 stock (número de piezas disponibles) */
-
+const fs = require('fs');
 class ProductManager {
-  constructor() {
+  constructor(path) {
     this.products = [];
+    this.path = path;
   }
-  addProduct({ title, description, price, thumbnail, stock }) {
-    let id;
-    if (this.products.length === 0) {
-      id = 1;
-    } else {
-      let lastProduct = this.products[this.products.length - 1];
-      id = lastProduct.id + 1;
+
+  async init() {
+    try {
+      const file = fs.existsSync(this.path);
+      if (!file) {
+        fs.promises.writeFile(this.path, '[]');
+        console.log('File created.');
+      } else {
+        this.products = JSON.parse(
+          await fs.promises.readFile(this.path, 'utf-8')
+        );
+      }
+    } catch (error) {
+      console.log(`Error initializing productManager: ${error}`);
     }
-    let product = {
-      title,
-      description,
-      price,
-      thumbnail,
-      stock,
-      id,
-    };
-    this.products.push(product);
+  }
+
+  async addProduct({ title, description, price, thumbnail, stock, code }) {
+    try {
+      stock = stock ?? 0;
+      if (!title || !description || !price || !thumbnail || !code) {
+        throw new Error('you must enter all the data to add the product.');
+      }
+      if (isNaN(Number(price)) || isNaN(Number(stock))) {
+        throw new Error('Price and stock must be numbers.');
+      }
+
+      let id;
+      if (this.products.length === 0) {
+        id = 1;
+      } else {
+        let lastProduct = this.products[this.products.length - 1];
+        id = lastProduct.id + 1;
+      }
+
+      let product = {
+        title,
+        description,
+        price,
+        thumbnail,
+        stock,
+        id,
+        code,
+      };
+      this.products.push(product);
+      const content = await JSON.stringify(this.products, null, 2);
+      await fs.promises.writeFile(this.path, content);
+      console.log('Product added successfully!');
+    } catch (error) {
+      console.log(`Error at creating new user: ${error}`);
+    }
   }
 
   getProducts() {
@@ -33,49 +68,93 @@ class ProductManager {
     return this.products;
   }
   getProductById(id) {
-    if (!id) {
-      console.log("You need to provide an id.");
-    } else {
-      let productById = this.products.find((e) => e.id === id);
-      if (productById) {
-        console.log(productById);
-        return productById;
+    try {
+      if (!id) {
+        console.log('You need to provide an id.');
       } else {
-        console.log("Product not found");
+        let productById = this.products.find((e) => e.id === id);
+        if (productById) {
+          console.log(productById);
+          return productById;
+        } else {
+          throw new Error('Product not found');
+        }
       }
+    } catch (error) {
+      console.error(`Error finding product: ${error}`);
+    }
+  }
+
+  async updateProduct(
+    id,
+    { title, description, price, thumbnail, stock, code }
+  ) {
+    try {
+      if (!id) throw new Error('Need to provide an id.');
+      const productIndex = this.products.findIndex(
+        (product) => product.id === id
+      );
+      if (productIndex === -1) {
+        throw new Error('Product not found.');
+      }
+      if (isNaN(Number(price)) || isNaN(Number(stock))) {
+        throw new Error('Price and stock must be numbers.');
+      }
+
+      const productToUpdate = {
+        ...this.products[productIndex],
+        title,
+        description,
+        price,
+        thumbnail,
+        stock,
+        code,
+      };
+      this.products[productIndex] = productToUpdate;
+
+      const content = await JSON.stringify(this.products, null, 2);
+      await fs.promises.writeFile(this.path, content);
+    } catch (error) {
+      console.error(`Error updating the product: ${error}`);
+    }
+  }
+
+  async deleteProduct(id) {
+    try {
+      if (!id) throw new Error('Need to provide an id.');
+      const index = this.products.findIndex((e) => e.id === id);
+      this.products.splice(index, 1);
+      const content = await JSON.stringify(this.products, null, 2);
+      await fs.promises.writeFile(this.path, content);
+      console.log('Product deleted successfully.');
+    } catch (error) {
+      console.error(error);
     }
   }
 }
 
-let products = new ProductManager();
-products.addProduct({
-  title: "Microphone",
-  description:
-    "It's the ideal all-in-one standalone microphone for either the aspiring streamer or podcaster looking for a condenser microphone with high-quality sound.",
-  price: 200,
-  thumbnail:
-    "https://cdn.discordapp.com/attachments/990652909534449714/1095373629337911327/productos34_25773.png",
-  stock: 2,
-});
+const manager = new ProductManager('./data.json');
 
-products.addProduct({
-  title: "Mouse",
-  description:
-    "Ambidextrous mouse with grip surface that provides comfort and control for greater precision in games.",
-  price: 2030,
-  thumbnail:
-    "https://cdn.discordapp.com/attachments/990652909534449714/1095373769633181787/61UxfXTUyvL.png",
-  stock: 4,
-});
-
-products.addProduct({
-  title: "Screen",
-  description: "21.5-inch FHD borderless monitor.",
-  price: 2030,
-  thumbnail:
-    "https://cdn.discordapp.com/attachments/990652909534449714/1095374578282405968/5017_1_9e03da5653d34c4b8fff32a618722f3b.png",
-  stock: 4,
-});
-
-//products.getProducts();
-products.getProductById(3);
+const crud = async () => {
+  await manager.init();
+  await manager.getProducts();
+  await manager.addProduct({
+    title: 'producto prueba',
+    description: 'Este es un producto prueba',
+    price: 200,
+    thumbnail: 'Sin imagen',
+    code: 'abc123',
+  });
+  await manager.getProducts();
+  await manager.getProductById(1);
+  await manager.updateProduct(1, {
+    title: 'Nuevo titulo',
+    description: 'Nueva descripción',
+    price: 1,
+    thumbnail: 'nueva imagen',
+    stock: 10,
+    code: 'ABC123',
+  });
+  await manager.deleteProduct(3);
+};
+crud();
