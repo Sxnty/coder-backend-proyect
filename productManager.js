@@ -24,6 +24,7 @@ class ProductManager {
       }
     } catch (error) {
       console.log(`Error initializing productManager: ${error}`);
+      return error
     }
   }
 
@@ -61,6 +62,7 @@ class ProductManager {
       return product.id
     } catch (error) {
       console.log(`addProduct error: ${error}`);
+      return error
     }
   }
 
@@ -71,6 +73,7 @@ class ProductManager {
       return this.products;
     } catch (error) {
       console.error(`getProducts error`)
+      return error
     }
   }
   getProductById(id) {
@@ -88,6 +91,7 @@ class ProductManager {
       }
     } catch (error) {
       console.error(`Error finding product: ${error}`);
+      return error
     }
   }
 
@@ -122,6 +126,7 @@ class ProductManager {
       await fs.promises.writeFile(this.path, content);
     } catch (error) {
       console.error(`Error updating the product: ${error}`);
+      return error
     }
   }
 
@@ -135,6 +140,7 @@ class ProductManager {
       console.log('Product deleted successfully.');
     } catch (error) {
       console.error(error);
+      return error
     }
   }
 }
