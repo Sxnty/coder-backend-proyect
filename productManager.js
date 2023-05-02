@@ -58,14 +58,20 @@ class ProductManager {
       const content = await JSON.stringify(this.products, null, 2);
       await fs.promises.writeFile(this.path, content);
       console.log('Product added successfully!');
+      return product.id
     } catch (error) {
-      console.log(`Error at creating new user: ${error}`);
+      console.log(`addProduct error: ${error}`);
     }
   }
 
   getProducts() {
+    try {
+      console.log(this.products);
     console.log(this.products);
-    return this.products;
+      return this.products;
+    } catch (error) {
+      console.error(`getProducts error`)
+    }
   }
   getProductById(id) {
     try {
