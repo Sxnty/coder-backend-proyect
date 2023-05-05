@@ -1,10 +1,10 @@
 /* title (nombre del producto)
-description (descripción del producto)
+description (descripciÃ³n del producto)
 price (precio)
 thumbnail (ruta de imagen)
-id (código identificador)
-stock (número de piezas disponibles) */
-const fs = require('fs');
+id (cÃ³digo identificador)
+stock (nÃºmero de piezas disponibles) */
+import fs from 'fs';
 class ProductManager {
   constructor(path) {
     this.products = [];
@@ -24,7 +24,7 @@ class ProductManager {
       }
     } catch (error) {
       console.log(`Error initializing productManager: ${error}`);
-      return error
+      return error;
     }
   }
 
@@ -59,39 +59,37 @@ class ProductManager {
       const content = await JSON.stringify(this.products, null, 2);
       await fs.promises.writeFile(this.path, content);
       console.log('Product added successfully!');
-      return product.id
+      return product.id;
     } catch (error) {
       console.log(`addProduct error: ${error}`);
-      return error
+      return error;
     }
   }
 
   getProducts() {
     try {
       console.log(this.products);
-    console.log(this.products);
       return this.products;
     } catch (error) {
-      console.error(`getProducts error`)
-      return error
+      console.error(`getProducts error`);
+      return error;
     }
   }
   getProductById(id) {
     try {
       if (!id) {
-        console.log('You need to provide an id.');
+        throw new Error('Invalid id');
+      }
+      let productById = this.products.find((e) => e.id === id);
+      if (productById) {
+        console.log(productById);
+        return productById;
       } else {
-        let productById = this.products.find((e) => e.id === id);
-        if (productById) {
-          console.log(productById);
-          return productById;
-        } else {
-          throw new Error('Product not found');
-        }
+        throw new Error('Product not found');
       }
     } catch (error) {
       console.error(`Error finding product: ${error}`);
-      return error
+      return { error: true, message: error.message };
     }
   }
 
@@ -126,7 +124,7 @@ class ProductManager {
       await fs.promises.writeFile(this.path, content);
     } catch (error) {
       console.error(`Error updating the product: ${error}`);
-      return error
+      return error;
     }
   }
 
@@ -140,28 +138,30 @@ class ProductManager {
       console.log('Product deleted successfully.');
     } catch (error) {
       console.error(error);
-      return error
+      return error;
     }
   }
 }
 
 const manager = new ProductManager('./data.json');
 
-const crud = async () => {
+/* const crud = async () => {
   await manager.init();
   await manager.getProducts();
+
   await manager.addProduct({
-    title: 'producto prueba',
-    description: 'Este es un producto prueba',
-    price: 200,
-    thumbnail: 'Sin imagen',
-    code: 'abc123',
+    title: 'Libro de cocina',
+    description: 'Libro de cocina con recetas de comida internacional',
+    price: 39.99,
+    thumbnail: 'https://example.com/images/libro.jpg',
+    code: 'LC7842',
   });
+
   await manager.getProducts();
   await manager.getProductById(1);
   await manager.updateProduct(1, {
     title: 'Nuevo titulo',
-    description: 'Nueva descripción',
+    description: 'Nueva descripciÃ³n',
     price: 1,
     thumbnail: 'nueva imagen',
     stock: 10,
@@ -169,4 +169,5 @@ const crud = async () => {
   });
   await manager.deleteProduct(3);
 };
-crud();
+crud(); */
+export default manager;
