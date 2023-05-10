@@ -28,10 +28,11 @@ class ProductManager {
     }
   }
 
-  async addProduct({ title, description, price, thumbnail, stock, code }) {
+  async addProduct({ title, description, price, thumbnail, stock, code, status, category }) {
     try {
-      stock = stock ?? 0;
-      if (!title || !description || !price || !thumbnail || !code) {
+      status = status ?? true;
+      console.log(!title, !description , !price , !category , !code , !status)
+      if (!title || !description || !price || !category || !code || !status) {
         throw new Error('you must enter all the data to add the product.');
       }
       if (isNaN(Number(price)) || isNaN(Number(stock))) {
@@ -95,33 +96,40 @@ class ProductManager {
 
   async updateProduct(
     id,
-    { title, description, price, thumbnail, stock, code }
+    { title, description, price, thumbnail, stock, code, category, status }
   ) {
     try {
-      if (!id) throw new Error('Need to provide an id.');
-      const productIndex = this.products.findIndex(
-        (product) => product.id === id
-      );
-      if (productIndex === -1) {
-        throw new Error('Product not found.');
-      }
-      if (isNaN(Number(price)) || isNaN(Number(stock))) {
-        throw new Error('Price and stock must be numbers.');
-      }
+      if (title && description && price && thumbnail && stock && code) {
 
-      const productToUpdate = {
-        ...this.products[productIndex],
-        title,
-        description,
-        price,
-        thumbnail,
-        stock,
-        code,
-      };
-      this.products[productIndex] = productToUpdate;
+        if (!id) throw new Error('Need to provide an id.');
+        const productIndex = this.products.findIndex((product) => {
+          return product.id == Number(id);
+        });
+        if (productIndex === -1) {
+          return {status: 400, message:'product not found'}
+        }
+        /*       if (isNaN(Number(price)) || isNaN(Number(stock))) {
+          throw new Error('Price and stock must be numbers.');
+        } */
 
-      const content = await JSON.stringify(this.products, null, 2);
-      await fs.promises.writeFile(this.path, content);
+        const productToUpdate = {
+          ...this.products[productIndex],
+          title,
+          description,
+          price,
+          thumbnail,
+          stock,
+          code,
+          category,
+          status
+        };
+        this.products[productIndex] = productToUpdate;
+        const content = await JSON.stringify(this.products, null, 2);
+        await fs.promises.writeFile(this.path, content);
+        return {status: 200, message:'updated'}
+      } else {
+        throw new Error('check data!')
+      }
     } catch (error) {
       console.error(`Error updating the product: ${error}`);
       return error;
@@ -131,16 +139,24 @@ class ProductManager {
   async deleteProduct(id) {
     try {
       if (!id) throw new Error('Need to provide an id.');
+      
       const index = this.products.findIndex((e) => e.id === id);
+      
+      if (index === -1) {
+        return {status: 400, message:'product not found'}
+      }
+      
       this.products.splice(index, 1);
       const content = await JSON.stringify(this.products, null, 2);
       await fs.promises.writeFile(this.path, content);
       console.log('Product deleted successfully.');
+      return {status: 200, message:'deleted'}
     } catch (error) {
-      console.error(error);
+      console.log(error);
       return error;
     }
   }
+  
 }
 
 const manager = new ProductManager('./data.json');

@@ -1,8 +1,11 @@
 import express from 'express';
 import manager from './productManager.js';
 import cartManager from './CartManager.js';
+import productsRouter from './routes/products.router.js';
+import cartsRouter from './routes/carts.router.js';
 let server = express();
 let PORT = 8080;
+server.use(express.json())
 
 let ready = async () => {
   console.log('Server ready on port ', PORT);
@@ -10,46 +13,6 @@ let ready = async () => {
   await manager.init();
 };
 server.listen(PORT, ready);
-
-let queryRoute = '/api/products';
-let queryFunction = async (req, res) => {
-  let limit = req.query.limit;
-  if (req.query.limit) {
-    let products = await manager.getProducts().slice(0, limit);
-    console.log(products);
-    if (!products.error) {
-      return res.send({ success: true, products });
-    } else {
-      return res.send({ success: false, msg: 'Cant react products' });
-    }
-  } else {
-    let products = await manager.getProducts();
-    if (products.length > 0) {
-      return res.send({ success: true, products });
-    } else {
-      return res.send({ success: false, msg: 'Cant reach products' });
-    }
-  }
-};
-
-let productByIdRoute = '/api/products/:pid';
-let productByIdFunction = async (req, res) => {
-  let parameter = req.params;
-  let id = Number(parameter.pid);
-
-  let one = await manager.getProductById(id);
-  if (!one.error) {
-    return res.send({
-      success: true,
-      response: one,
-    });
-  } else {
-    return res.send({
-      success: false,
-      response: one.message,
-    });
-  }
-};
 
 let cartsRoute = '/api/carts';
 let cartsFunction = async (req, res) => {
@@ -75,8 +38,7 @@ let cartByIdFunction = async (req, res) => {
     return res.send({ success: false, error: error.message });
   }
 };
-
-server.get(queryRoute, queryFunction);
-server.get(productByIdRoute, productByIdFunction);
-server.get(cartsRoute, cartsFunction);
-server.get(cartByIdRoute, cartByIdFunction);
+server.use('/api/products', productsRouter)
+/* server.get(queryRoute, queryFunction); */
+/* server.get(productByIdRoute, productByIdFunction); */
+server.use('/api/carts', cartsRouter)

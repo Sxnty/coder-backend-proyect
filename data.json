@@ -1,39 +1,22 @@
 [
   {
-    "title": "Nuevo titulo",
-    "description": "Nueva descripciÃ³n",
-    "price": 1,
-    "thumbnail": "nueva imagen",
+    "title": "Camisa nueva",
+    "description": "Camisa de manga corta",
+    "price": 29.99,
+    "thumbnail": "https://example.com/camisa.jpg",
     "stock": 10,
-    "id": 1,
+    "id": 4,
     "code": "ABC123"
   },
   {
-    "title": "Smartphone Android",
-    "description": "Smartphone Android de gama media con cámara dual",
-    "price": 299.99,
-    "thumbnail": "https://example.com/images/smartphone.jpg",
-    "stock": 0,
-    "id": 2,
-    "code": "SM3210"
-  },
-  {
-    "title": "Pelota de fútbol",
-    "description": "Pelota de fútbol tamaño oficial",
-    "price": 19.99,
-    "thumbnail": "https://example.com/images/pelota.jpg",
-    "stock": 0,
-    "id": 4,
-    "code": "PF0915"
-  },
-  {
-    "title": "Cámara de seguridad",
-    "description": "Cámara de seguridad para el hogar con visión nocturna",
-    "price": 69.99,
-    "thumbnail": "https://example.com/images/camara.jpg",
-    "stock": 0,
+    "title": "Camisa",
+    "description": "Camisa de manga corta",
+    "price": 29.99,
+    "thumbnail": "https://example.com/camisa.jpg",
+    "stock": 10,
     "id": 5,
-    "code": "CS7428"
+    "code": "ABC123",
+    "category": "clothes"
   },
   {
     "title": "Mochila escolar",
@@ -45,13 +28,13 @@
     "code": "ME3781"
   },
   {
-    "title": "Bolígrafo de lujo",
-    "description": "Bolígrafo de lujo con cuerpo de metal",
-    "price": 49.99,
-    "thumbnail": "https://example.com/images/boligrafo.jpg",
-    "stock": 0,
+    "title": "Camisa n2ueva",
+    "description": "Camisa de manga corta",
+    "price": 29.99,
+    "thumbnail": "https://example.com/camisa.jpg",
+    "stock": 10,
     "id": 7,
-    "code": "BL1246"
+    "code": "ABC123"
   },
   {
     "title": "Juego de mesa",
@@ -88,5 +71,34 @@
     "stock": 0,
     "id": 11,
     "code": "LC7842"
+  },
+  {
+    "title": "Camisa nueva",
+    "description": "Camisa de manga corta",
+    "price": 29.99,
+    "thumbnail": "https://example.com/camisa.jpg",
+    "stock": 10,
+    "id": 12,
+    "code": "ABC123"
+  },
+  {
+    "title": "Camisa nueva",
+    "description": "Camisa de manga corta",
+    "price": 29.99,
+    "thumbnail": "https://example.com/camisa.jpg",
+    "stock": 10,
+    "id": 13,
+    "code": "ABC123"
+  },
+  {
+    "title": "Camisa",
+    "description": "Camisa de manga corta",
+    "price": 29.99,
+    "thumbnail": "https://example.com/camisa.jpg",
+    "stock": 10,
+    "id": 14,
+    "code": "ABC123",
+    "status": "false",
+    "category": "clothes"
   }
 ]
