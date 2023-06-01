@@ -1,81 +1,189 @@
 /* title (nombre del producto)
-description (descripción del producto)
+description (descripciÃ³n del producto)
 price (precio)
 thumbnail (ruta de imagen)
-id (código identificador)
-stock (número de piezas disponibles) */
-
+id (cÃ³digo identificador)
+stock (nÃºmero de piezas disponibles) */
+import fs from 'fs';
 class ProductManager {
-  constructor() {
+  constructor(path) {
     this.products = [];
+    this.path = path;
   }
-  addProduct({ title, description, price, thumbnail, stock }) {
-    let id;
-    if (this.products.length === 0) {
-      id = 1;
-    } else {
-      let lastProduct = this.products[this.products.length - 1];
-      id = lastProduct.id + 1;
+
+  async init() {
+    try {
+      const file = fs.existsSync(this.path);
+      if (!file) {
+        fs.promises.writeFile(this.path, '[]');
+        console.log('File created.');
+      } else {
+        this.products = JSON.parse(
+          await fs.promises.readFile(this.path, 'utf-8')
+        );
+      }
+    } catch (error) {
+      console.log(`Error initializing productManager: ${error}`);
+      return error;
     }
-    let product = {
-      title,
-      description,
-      price,
-      thumbnail,
-      stock,
-      id,
-    };
-    this.products.push(product);
+  }
+
+  async addProduct({ title, description, price, thumbnail, stock, code, status, category }) {
+    try {
+      status = status ?? true;
+      console.log(!title, !description , !price , !category , !code , !status)
+      if (!title || !description || !price || !category || !code || !status) {
+        throw new Error('you must enter all the data to add the product.');
+      }
+      if (isNaN(Number(price)) || isNaN(Number(stock))) {
+        throw new Error('Price and stock must be numbers.');
+      }
+
+      let id;
+      if (this.products.length === 0) {
+        id = 1;
+      } else {
+        let lastProduct = this.products[this.products.length - 1];
+        id = lastProduct.id + 1;
+      }
+
+      let product = {
+        title,
+        description,
+        price,
+        thumbnail,
+        stock,
+        id,
+        code,
+      };
+      this.products.push(product);
+      const content = await JSON.stringify(this.products, null, 2);
+      await fs.promises.writeFile(this.path, content);
+      console.log('Product added successfully!');
+      return product.id;
+    } catch (error) {
+      console.log(`addProduct error: ${error}`);
+      return error;
+    }
   }
 
   getProducts() {
-    console.log(this.products);
-    return this.products;
+    try {
+      console.log(this.products);
+      return this.products;
+    } catch (error) {
+      console.error(`getProducts error`);
+      return error;
+    }
   }
   getProductById(id) {
-    if (!id) {
-      console.log("You need to provide an id.");
-    } else {
+    try {
+      if (!id) {
+        throw new Error('Invalid id');
+      }
       let productById = this.products.find((e) => e.id === id);
       if (productById) {
         console.log(productById);
         return productById;
       } else {
-        console.log("Product not found");
+        throw new Error('Product not found');
       }
+    } catch (error) {
+      console.error(`Error finding product: ${error}`);
+      return { error: true, message: error.message };
     }
   }
+
+  async updateProduct(
+    id,
+    { title, description, price, thumbnail, stock, code, category, status }
+  ) {
+    try {
+      if (title && description && price && thumbnail && stock && code) {
+
+        if (!id) throw new Error('Need to provide an id.');
+        const productIndex = this.products.findIndex((product) => {
+          return product.id == Number(id);
+        });
+        if (productIndex === -1) {
+          return {status: 400, message:'product not found'}
+        }
+        /*       if (isNaN(Number(price)) || isNaN(Number(stock))) {
+          throw new Error('Price and stock must be numbers.');
+        } */
+
+        const productToUpdate = {
+          ...this.products[productIndex],
+          title,
+          description,
+          price,
+          thumbnail,
+          stock,
+          code,
+          category,
+          status
+        };
+        this.products[productIndex] = productToUpdate;
+        const content = await JSON.stringify(this.products, null, 2);
+        await fs.promises.writeFile(this.path, content);
+        return {status: 200, message:'updated'}
+      } else {
+        throw new Error('check data!')
+      }
+    } catch (error) {
+      console.error(`Error updating the product: ${error}`);
+      return error;
+    }
+  }
+
+  async deleteProduct(id) {
+    try {
+      if (!id) throw new Error('Need to provide an id.');
+      
+      const index = this.products.findIndex((e) => e.id === id);
+      
+      if (index === -1) {
+        return {status: 400, message:'product not found'}
+      }
+      
+      this.products.splice(index, 1);
+      const content = await JSON.stringify(this.products, null, 2);
+      await fs.promises.writeFile(this.path, content);
+      console.log('Product deleted successfully.');
+      return {status: 200, message:'deleted'}
+    } catch (error) {
+      console.log(error);
+      return error;
+    }
+  }
+  
 }
 
-let products = new ProductManager();
-products.addProduct({
-  title: "Microphone",
-  description:
-    "It's the ideal all-in-one standalone microphone for either the aspiring streamer or podcaster looking for a condenser microphone with high-quality sound.",
-  price: 200,
-  thumbnail:
-    "https://cdn.discordapp.com/attachments/990652909534449714/1095373629337911327/productos34_25773.png",
-  stock: 2,
-});
+const manager = new ProductManager('./data.json');
 
-products.addProduct({
-  title: "Mouse",
-  description:
-    "Ambidextrous mouse with grip surface that provides comfort and control for greater precision in games.",
-  price: 2030,
-  thumbnail:
-    "https://cdn.discordapp.com/attachments/990652909534449714/1095373769633181787/61UxfXTUyvL.png",
-  stock: 4,
-});
+/* const crud = async () => {
+  await manager.init();
+  await manager.getProducts();
 
-products.addProduct({
-  title: "Screen",
-  description: "21.5-inch FHD borderless monitor.",
-  price: 2030,
-  thumbnail:
-    "https://cdn.discordapp.com/attachments/990652909534449714/1095374578282405968/5017_1_9e03da5653d34c4b8fff32a618722f3b.png",
-  stock: 4,
-});
+  await manager.addProduct({
+    title: 'Libro de cocina',
+    description: 'Libro de cocina con recetas de comida internacional',
+    price: 39.99,
+    thumbnail: 'https://example.com/images/libro.jpg',
+    code: 'LC7842',
+  });
 
-//products.getProducts();
-products.getProductById(3);
+  await manager.getProducts();
+  await manager.getProductById(1);
+  await manager.updateProduct(1, {
+    title: 'Nuevo titulo',
+    description: 'Nueva descripciÃ³n',
+    price: 1,
+    thumbnail: 'nueva imagen',
+    stock: 10,
+    code: 'ABC123',
+  });
+  await manager.deleteProduct(3);
+};
+crud(); */
+export default manager;
